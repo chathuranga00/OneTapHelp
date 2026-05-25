@@ -11,6 +11,17 @@ export const colors = {
   error: '#FF4444',
   success: '#2E7D32',
   overlay: 'rgba(0, 0, 0, 0.75)',
+  mapBackground: '#12141C',
+  mapGrid: '#1E2230',
+  panelBackground: '#F2F2F2',
+  panelText: '#1A1A1A',
+  panelTextMuted: '#5C5C5C',
+  accentBlue: '#1D6FD8',
+  accentBlueLight: '#E8F1FC',
+  locationBannerBg: '#E8F1FC',
+  locationBannerBorder: '#B8D4F0',
+  safePillBg: '#FCE8E8',
+  navInactive: '#6B5E5E',
 } as const;
 
 export type ColorKey = keyof typeof colors;
