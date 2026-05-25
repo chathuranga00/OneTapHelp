@@ -68,7 +68,11 @@ export const strings = {
 
   sosActive: {
     title: 'SOS ACTIVE',
-    subtitle: 'Alerting your emergency contacts',
+    subtitle: 'Help is on the way. Your location and audio are being shared.',
+    elapsed: 'Elapsed',
+    contactsNotified: 'Contacts notified',
+    liveLocation: 'Live location',
+    imSafe: 'I AM SAFE',
     cancel: 'Cancel SOS',
   },
 

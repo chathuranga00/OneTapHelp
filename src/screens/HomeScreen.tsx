@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -10,18 +10,25 @@ import {
   SilentModeCard,
   SosHoldButton,
 } from '../components/home';
-import { config } from '../constants';
+import { colors, config } from '../constants';
 import { useDeviceStatus } from '../hooks';
 import type { RootStackParamList } from '../navigation';
-import { requestLocationPermission, requestNotificationPermission } from '../services';
+import {
+  getActiveSosEventId,
+  requestLocationPermission,
+  requestNotificationPermission,
+  triggerSOS,
+} from '../services';
 import { useAppStore } from '../store';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const setIsSosActive = useAppStore((s) => s.setIsSosActive);
+  const session = useAppStore((s) => s.session);
+  const setActiveSos = useAppStore((s) => s.setActiveSos);
   const { gpsStatus, refreshGps } = useDeviceStatus();
+  const [sosError, setSosError] = useState<string | null>(null);
 
   const [silentMode, setSilentMode] = useState(false);
   const [holding, setHolding] = useState(false);
@@ -46,12 +53,28 @@ export function HomeScreen({ navigation }: Props) {
   }, [refreshGps]);
 
   const activateSos = useCallback(async () => {
-    await requestLocationPermission();
-    await requestNotificationPermission();
-    refreshGps();
-    setIsSosActive(true);
-    navigation.navigate('SOSActive');
-  }, [navigation, refreshGps, setIsSosActive]);
+    const userId = session?.user.id;
+    if (!userId) {
+      setSosError('You must be signed in to trigger SOS.');
+      return;
+    }
+
+    setSosError(null);
+    try {
+      await requestLocationPermission();
+      await requestNotificationPermission();
+      refreshGps();
+      await triggerSOS(userId);
+      const eventId = getActiveSosEventId();
+      if (!eventId) {
+        throw new Error('SOS event was not created.');
+      }
+      setActiveSos(eventId, Date.now());
+      navigation.navigate('SOSActive', { eventId });
+    } catch (e) {
+      setSosError(e instanceof Error ? e.message : 'Failed to trigger SOS');
+    }
+  }, [navigation, refreshGps, session?.user.id, setActiveSos]);
 
   const onPressIn = () => {
     setHolding(true);
@@ -92,6 +115,8 @@ export function HomeScreen({ navigation }: Props) {
         />
 
         <SilentModeCard enabled={silentMode} onToggle={setSilentMode} />
+
+        {sosError ? <Text style={styles.sosError}>{sosError}</Text> : null}
       </ScrollView>
 
       <HomeBottomNav navigation={navigation} activeTab="sos" />
@@ -110,5 +135,12 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 16,
+  },
+  sosError: {
+    color: colors.error,
+    textAlign: 'center',
+    marginHorizontal: 20,
+    marginTop: 8,
+    fontSize: 13,
   },
 });

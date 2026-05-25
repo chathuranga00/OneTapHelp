@@ -1,0 +1,1 @@
+export { SosLocationMap } from './SosLocationMap';

@@ -25,3 +25,10 @@ export {
   cancelAllNotifications,
 } from './notificationService';
 export { configureAudioMode, playAlarmLoop, stopAlarm } from './audioService';
+export {
+  triggerSOS,
+  resolveSOS,
+  sendSMSAlert,
+  getActiveSosEventId,
+  getSosEventLocation,
+} from './sosService';

@@ -15,11 +15,15 @@ type AppState = {
   isAuthenticated: boolean;
   session: Session | null;
   isSosActive: boolean;
+  activeSosEventId: string | null;
+  sosStartedAt: number | null;
   emergencyContacts: EmergencyContact[];
   setHasCompletedOnboarding: (value: boolean) => void;
   setSession: (session: Session | null) => void;
   setIsAuthenticated: (value: boolean) => void;
   setIsSosActive: (value: boolean) => void;
+  setActiveSos: (eventId: string, startedAt: number) => void;
+  clearActiveSos: () => void;
   setEmergencyContacts: (contacts: EmergencyContact[]) => void;
   addEmergencyContact: (contact: EmergencyContact) => void;
   reset: () => void;
@@ -30,6 +34,8 @@ const initialState = {
   isAuthenticated: false,
   session: null as Session | null,
   isSosActive: false,
+  activeSosEventId: null as string | null,
+  sosStartedAt: null as number | null,
   emergencyContacts: [] as EmergencyContact[],
 };
 
@@ -47,6 +53,18 @@ export const useAppStore = create<AppState>((set) => ({
       session: value ? state.session : null,
     })),
   setIsSosActive: (value) => set({ isSosActive: value }),
+  setActiveSos: (eventId, startedAt) =>
+    set({
+      activeSosEventId: eventId,
+      sosStartedAt: startedAt,
+      isSosActive: true,
+    }),
+  clearActiveSos: () =>
+    set({
+      activeSosEventId: null,
+      sosStartedAt: null,
+      isSosActive: false,
+    }),
   setEmergencyContacts: (contacts) => set({ emergencyContacts: contacts }),
   addEmergencyContact: (contact) =>
     set((state) => ({

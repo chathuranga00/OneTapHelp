@@ -3,7 +3,7 @@ export type RootStackParamList = {
   Auth: undefined;
   SetupContacts: undefined;
   Home: undefined;
-  SOSActive: undefined;
+  SOSActive: { eventId: string };
   History: undefined;
   Settings: undefined;
   EmergencyGuide: undefined;
