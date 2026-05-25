@@ -101,16 +101,22 @@ function startLocationUpdates(eventId: string): void {
 
   locationInterval = setInterval(() => {
     void (async () => {
-      const coords = await getCurrentPosition();
-      if (!coords || !activeEventId) return;
+      try {
+        const coords = await getCurrentPosition();
+        if (!coords || !activeEventId) return;
 
-      await supabase
-        .from('sos_events')
-        .update({
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        })
-        .eq('id', activeEventId);
+        const { error } = await supabase.functions.invoke('live-tracking', {
+          body: {
+            eventId: activeEventId,
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+          },
+        });
+
+        if (error) throw error;
+      } catch (err) {
+        console.warn('[live-tracking]', err);
+      }
     })();
   }, LOCATION_UPDATE_MS);
 }
@@ -123,32 +129,33 @@ export async function sendSMSAlert(
 ): Promise<void> {
   const message = `EMERGENCY: ${cachedUserName} triggered SOS. Track live location: ${buildTrackingUrl(eventId, lat, lng)}`;
 
-  const { error } = await supabase.functions.invoke('send-sms', {
+  const { data, error } = await supabase.functions.invoke('send-sms', {
     body: {
-      phone: contact.phone,
+      to: contact.phone,
       message,
-      eventId,
-      latitude: lat,
-      longitude: lng,
-      contactName: contact.name,
     },
   });
 
   if (error) throw error;
+  if (data && typeof data === 'object' && 'success' in data && !data.success) {
+    throw new Error((data as { error?: string }).error ?? 'SMS send failed');
+  }
 }
 
 async function sendSafeFollowUpSms(contact: EmergencyContact): Promise<void> {
   const message = `${cachedUserName} is now safe.`;
 
-  const { error } = await supabase.functions.invoke('send-sms', {
+  const { data, error } = await supabase.functions.invoke('send-sms', {
     body: {
-      phone: contact.phone,
+      to: contact.phone,
       message,
-      contactName: contact.name,
     },
   });
 
   if (error) throw error;
+  if (data && typeof data === 'object' && 'success' in data && !data.success) {
+    throw new Error((data as { error?: string }).error ?? 'SMS send failed');
+  }
 }
 
 async function uploadAudioRecording(
@@ -220,6 +227,14 @@ export async function triggerSOS(userId: string): Promise<void> {
       await Linking.openURL(telUrl);
     }
   }
+
+  await supabase.functions.invoke('live-tracking', {
+    body: {
+      eventId,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+    },
+  });
 
   startLocationUpdates(eventId);
 }

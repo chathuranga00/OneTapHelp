@@ -4,6 +4,7 @@ export type RootStackParamList = {
   SetupContacts: undefined;
   Home: undefined;
   SOSActive: { eventId: string };
+  Track: { eventId: string; lat?: string; lng?: string };
   History: undefined;
   Settings: undefined;
   EmergencyGuide: undefined;

@@ -1,0 +1,66 @@
+import { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import MapView, { Marker, type Region } from 'react-native-maps';
+import { Text } from 'react-native-paper';
+import { MaterialCommunityIcons } from '../../icons';
+
+import { colors } from '../../constants';
+
+type SosLocationMapProps = {
+  latitude: number | null;
+  longitude: number | null;
+};
+
+export function SosLocationMap({ latitude, longitude }: SosLocationMapProps) {
+  const [region, setRegion] = useState<Region | null>(null);
+
+  useEffect(() => {
+    if (latitude != null && longitude != null) {
+      setRegion({
+        latitude,
+        longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+    }
+  }, [latitude, longitude]);
+
+  if (latitude == null || longitude == null || !region) {
+    return (
+      <View style={styles.fallback}>
+        <MaterialCommunityIcons name="map-marker-off" size={32} color={colors.textMuted} />
+        <Text style={styles.fallbackText}>Waiting for location…</Text>
+      </View>
+    );
+  }
+
+  return (
+    <MapView style={styles.map} region={region} showsUserLocation>
+      <Marker
+        coordinate={{ latitude, longitude }}
+        title="SOS location"
+        pinColor={colors.primary}
+      />
+    </MapView>
+  );
+}
+
+const styles = StyleSheet.create({
+  map: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+  },
+  fallback: {
+    height: 200,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  fallbackText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+  },
+});

@@ -66,6 +66,12 @@ export const strings = {
     battery: 'Battery',
   },
 
+  track: {
+    title: 'Live SOS location',
+    subtitle: 'Shared location from an active emergency alert.',
+    waitingForLocation: 'Waiting for location updates…',
+  },
+
   sosActive: {
     title: 'SOS ACTIVE',
     subtitle: 'Help is on the way. Your location and audio are being shared.',
