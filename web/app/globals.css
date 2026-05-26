@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  min-height: 100dvh;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Pulsing SOS map marker */
+.pulse-marker {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%);
+}
+
+.pulse-marker::before,
+.pulse-marker::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #cc0000;
+}
+
+.pulse-marker::before {
+  animation: pulse-ring 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.pulse-marker::after {
+  inset: 5px;
+  background: #ff3333;
+  box-shadow: 0 0 12px rgba(204, 0, 0, 0.8);
+}
